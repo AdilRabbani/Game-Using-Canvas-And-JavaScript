@@ -1,0 +1,614 @@
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+    <style type = "text/css">
+        
+        body{
+            margin: 10px;
+            background: url(bg.png);
+            font-family: 'Righteous', cursive; 
+            font-size: 25px;
+            color: white;
+        }
+        
+        #my_canvas{                              
+            background: #003366;
+            border: #000 2px solid;
+            margin-right: 50px;
+        }
+        
+        #score_div{
+            float: left;
+        }
+        
+        #about{
+            width:100%;
+            height: 40%;
+        }
+            
+        a:link{
+            color:white;
+        }
+        
+        a:visited{
+            color:white;
+        }
+        
+        a{
+            text-decoration:none;
+        }
+        
+        a:hover{
+            color: black;
+        }
+        
+        #gamepad{
+            width:100px;
+            height: 100px;
+        }
+    
+    </style>
+    <script>
+        function initCanvas(){                                                  // this function is actually loaded in the window
+            var ctx = document.getElementById("my_canvas").getContext("2d");              // getting context of the canvas in ctx
+            
+            var startgame = false;                                 // a boolean value to start the game when the user clicks the play button
+            ctx.canvas.addEventListener("click",function(event){                  // event listener for a click to play the game
+                var mouseX = event.clientX - ctx.canvas.offsetLeft;           // getting X and Y coordinates of the mouse click
+                var mouseY = event.clientY - ctx.canvas.offsetTop;
+                        
+                if ((mouseX >= 184 && mouseX <= 329) && (mouseY >= 252 && mouseY <= 396)){   // if the click is in range of the play button
+                    startgame = true;                                                           // start the game
+                }
+                
+            });
+            
+            var cW = ctx.canvas.width , cH = ctx.canvas.height;                    // getting width and height of the canvas in variables
+            var y =  -10;                                                // Y coordinate of the first red circle for the red car
+            var x = 35;                                                  // X coordinate of the first red circle for the red car
+            var x_2 = 165;                                               // X coordinate of the second red circle for the red car
+            var y_2 = -10;                                               // Y coordinate of the second red circle for the red car
+            
+            var x_blue = 420;                                            // X coordinate of the first blue circle for blue red car
+            var y_blue = -10;                                            // Y coordinate of the first blue circle for the blue car
+            
+            var x_blue_2 = 300;                                          // X coordinate of the second blue circle for the blue car
+            var y_blue_2 = -10;                                          // Y coordinate of the second blue circle for the blue car
+            
+            var keystate;                // keystate variable to detect key pressed (A and D) and (arrow key left and arrow key right)
+                
+            var moveredcar = 35;                                         // X movement of the red car
+            var movebluecar = 420;                                       // X movement of the blue car
+            
+            var redcarmoveleft = 65;                                     // keycode of A for moving red car left
+            var redcarmoveright = 68;                                    // keycode of D for moving red car right
+            
+            var bluecarmoveleft = 37;                                    // keycode of left arrow key for moving blue car left
+            var bluecarmoveright = 39;                                   // keycode of right arrow key for moving blue car right
+            
+            var score = 0;                                               // score variable to increment and display score
+            
+            var playbutton = new Image();                                // playbutton image displayed at the start of the game
+            playbutton.src = "play.svg";                                 // loading playbutton image
+            
+            var redcar = new Image();                                    // redcar image used in the game
+            redcar.src = "redcar.png";                                   // loading redcar image
+            
+            var bluecar = new Image();                                   // bluecar image used in the game
+            bluecar.src = "bluecar.png";                                 // loading bluecar image
+            
+            var arrayofcircle = new Array();                             // an array to store circles 
+            arrayofcircle[0] = new Image();                              // loading circles images
+            arrayofcircle[0].src = "redcircle.png";                      // 2 red circles
+            arrayofcircle[1] = new Image();
+            arrayofcircle[1].src = "redcircle.png";
+            arrayofcircle[2] = new Image();
+            arrayofcircle[2].src = "bluecircle.png";                     // 2 blue circles
+            arrayofcircle[3] = new Image();
+            arrayofcircle[3].src = "bluecircle.png";
+            
+            var obstacle = new Array();                                  // an array to store red car obstacles
+            obstacle[0] = new Image();                                   // loading red obstacles images
+            obstacle[0].src = "obstaclered.png";
+            obstacle[1] = new Image();
+            obstacle[1].src = "obstaclered.png";
+            
+            var blueobstacle = new Array();                              // an array to store blue car obstacles
+            blueobstacle[0] = new Image();                               // loading blue obstacles images
+            blueobstacle[0].src = "obstacleblue.png";
+            blueobstacle[1] = new Image();
+            blueobstacle[1].src = "obstacleblue.png";
+           
+            var gameover = false;                                        // a boolean variable to detect game over state
+            
+            var obsredx_1 = 35;                                          // X coordinate of the first red obstacle
+            var obsredx_2 = 165;                                         // X coordinate of the second red obstacle
+            var obsredy_1 = -200;                                        // Y coordinate of the first red obstacle
+            var obsredy_2 = 150;                                         // Y coordinate of the second red obstacle
+            
+            var obsbluex_1 = 300;                                        // X coordinate of the first blue obstacle
+            var obsbluex_2 = 420;                                        // X coordinate of the second blue obstacle
+            var obsbluey_1 = -300;                                       // Y coordinate of the first blue obstacle
+            var obsbluey_2 = -100;                                       // Y coordinate of the second blue obstacle
+            
+                                    // There are altogether 4 particles for red and blue car each
+            
+            var particlePosX ;                                      // X coordinate of the first red particle
+            var particlePosY = 555;                                 // Y coordinate of the first red particle
+            
+            var particlevy = 2;                                     // variable to increase Y coordinate of first red particle
+            var particlesize = 5;                                   // particle size of the first red particle
+            
+            var particlePosX_2;                                     // X coordinate of the second red particle
+            var particlePosY_2 = 555;                               // Y coordinate of the second red particle
+            
+            var particlevy_2 = 1;                                   // variable to increase Y coordinate of second red particle
+            var particlesize_2 = 2;                                 // particle size of the second red particle
+            
+            var particleopacity = 1;                                // variable to control particle opacity
+            var gameoveropacity = 0;                                // variable to control game over font opacity
+            
+            var particlePosX_3;                                     // X coordinate of the third red particle
+            var particlePosY_3 = 555;                               // Y coordinate of the third red particle
+            
+            var particlevy_3 = 1.5;                                 // variable to increase Y coordinate of third red particle
+            var particlesize_3 = 20;                                // particle size of the third red particle
+            
+            var particlePosX_4;                                     // X coordinate of the fourth red particle
+            var particlePosY_4 = 555;                               // Y coordinate of the fourth red particle
+            
+            var particlevy_4 = 2;                                   // variable to increase Y coordinate of fourth red particle
+            var particlesize_4 = 2;                                 // particle size of the fourth red particle
+            
+            
+            var blueparticlePosX ;                                  // X coordinate of the first blue particle
+            var blueparticlePosY = 555;                             // Y coordinate of the first blue particle
+            
+            var blueparticlevy = 1;                                 // variable to increase Y coordinate of first blue particle
+            var blueparticlesize = 5;                               // particle size of the first blue particle
+            
+            var blueparticlePosX_2;                                 // X coordinate of the second blue particle
+            var blueparticlePosY_2 = 555;                           // Y coordinate of the second blue particle
+            
+            var blueparticlevy_2 = 2;                               // variable to increase Y coordinate of second blue particle
+            var blueparticlesize_2 = 2;                             // particle size of the second blue particle
+            
+            var blueparticleopacity = 1;                            // variable to control blue particle opacity
+            
+            var blueparticlePosX_3;                                 // X coordinate of the third blue particle
+            var blueparticlePosY_3 = 555;                           // Y coordinate of the third blue particle
+            
+            var blueparticlevy_3 = 2;                               // variable to increase Y coordinate of third blue particle
+            var blueparticlesize_3 = 20;                            // particle size of the third blue particle
+            
+            var blueparticlePosX_4;                                 // X coordinate of the fourth blue particle
+            var blueparticlePosY_4 = 555;                           // Y coordinate of the fourth blue particle
+            
+            var blueparticlevy_4 = 1;                               // variable to increase Y coordinate of fourth blue particle
+            var blueparticlesize_4 = 2;                             // particle size of the fourth blue particle
+            
+            function animate(){                               // this function is used to draw and animate things
+                
+                ctx.save();                                    // save the present canvas state on ram
+                
+                ctx.clearRect(0,0,cW,cH);                        // clear canvas
+                
+                                                                  // draw obstacles and circles
+                
+                ctx.drawImage(arrayofcircle[0],x,y,50,50);
+                
+                ctx.drawImage(arrayofcircle[1],x_2,y_2,50,50);
+                
+                ctx.drawImage(arrayofcircle[2],x_blue,y_blue,50,50);
+                
+                ctx.drawImage(arrayofcircle[3],x_blue_2,y_blue_2,50,50);
+                
+                ctx.drawImage(obstacle[0],obsredx_1,obsredy_1,50,50);
+                
+                ctx.drawImage(obstacle[1],obsredx_2,obsredy_2,50,50);
+            
+                ctx.drawImage(blueobstacle[0],obsbluex_1,obsbluey_1,50,50);
+                
+                ctx.drawImage(blueobstacle[1],obsbluex_2,obsbluey_2,50,50);
+                
+                if (gameover == false && startgame == true){               // if it is not the game over state and the player has 
+                                                                          // clicked the play button, start the game
+                                                                      // increase the Y coordinates of obstacles and circles
+                y+= 4;
+                y_2 += 4;
+                y_blue += 4;
+                y_blue_2 += 4;
+                
+                obsredy_1 += 4;
+                obsredy_2 += 4;
+                    
+                obsbluey_1 += 4;
+                obsbluey_2 += 4;
+                
+                }
+                
+                                                                          // collision detection for red obstacles
+                
+                if (((moveredcar >= obsredx_1 || moveredcar <= obsredx_1) && (moveredcar > 0 && moveredcar < 90)) && obsredy_1 >= 430 && (obsredy_1 <= 500)){
+                    gameover = true;
+                }
+                
+                if (((moveredcar >= obsredx_2 || moveredcar <= obsredx_2) && (moveredcar > 120 && moveredcar < 250)) && obsredy_2 >= 430 && (obsredy_2 <= 540)){
+                    gameover = true;
+                }
+                
+                                                              // reseting obstacles' positions if they move out of the canvas
+                
+                if (obsredy_1 >= 600){
+                    obsredy_1 = -200;
+                }
+                
+                if (obsredy_2 >= 600){
+                    obsredy_2 = - 150;
+                }
+                
+                                                                             // collision detection of red circles
+                
+                if (((moveredcar >= x || moveredcar <= x) && (moveredcar > 0 && moveredcar < 90)) && y  >= 430 && (y <= 500) ){
+                    score += 1;
+                    document.getElementById("score_p").innerHTML = score;
+                    y = -20;
+                }
+                
+                if (((moveredcar >= x_2 || moveredcar <= x_2) && (moveredcar > 120 && moveredcar < 250) ) && y_2 >= 430 && (y_2 <= 500) ){
+                    score += 1;
+                    document.getElementById("score_p").innerHTML = score;
+                    y_2 = -20;
+                }
+                
+                                                                     // reseting circles' positions if they move out of the canvas
+                
+                if (y >= 600){
+                    y = -20;
+                }
+                
+                if (y_2 >= 600){
+                    y_2 = -20;
+                }
+                
+                                                                                  // collision detection of blue circles
+                
+                if (((movebluecar >= x_blue || movebluecar <= x_blue) && (movebluecar > 370 && movebluecar < 450)) && y_blue >= 430 && (y_blue <= 500)){
+                    score += 1;
+                    document.getElementById("score_p").innerHTML = score;
+                    y_blue = -20;
+                }
+                
+                                                                     // reseting position of the circle if it moves out of the screen
+                
+                if (y_blue >= 600){
+                    y_blue = -20;
+                }
+                
+                                                                             // collision detection of blue circles
+                
+                if (((movebluecar >= x_blue_2 || movebluecar <= x_blue_2) && (movebluecar > 294 && movebluecar < 355)) && y_blue_2 >= 430 && (y_blue_2 <= 500)){
+                    score += 1;
+                    document.getElementById("score_p").innerHTML = score;
+                    y_blue_2 = -20;
+                }
+                
+                
+                                                             // reseting position of the circle if it moves out of the screen
+                
+                if (y_blue_2 >= 600){
+                    y_blue_2 = -20;
+                }
+                
+               
+                // collision detection of blue obstacles
+                
+                if ((movebluecar > 260 && movebluecar < 350) && (obsbluey_1 >= 430) && (obsbluey_1 <= 540)){
+                      
+                        gameover = true;
+                }
+                
+                                                           // reseting postion of the blue obstacle if it moves out of the screen
+                
+                if (obsbluey_1 >= 600){
+                    obsbluey_1 = -300;
+                }
+                
+                                                                               // collision detection of blue obstacles
+                
+                if ((movebluecar > 370 && movebluecar < 450) && (obsbluey_2 >= 430) && (obsbluey_2 <= 540)){
+                        gameover = true;
+                }
+                
+                                                            // reseting position of the blue obstacle if it moves out of the screen
+                
+                if (obsbluey_2 >= 600){
+                    obsbluey_2 = -100;
+                }
+                
+                                                                       // drawing lines on the canvas that are tracks for the cars
+                
+                 var w = 4;
+                    var line_x = 380;
+                    var line_y = 0;
+                    var step = 600;
+                    ctx.fillStyle = "#cce6ff";
+                    ctx.fillRect(line_x,line_y,w,step);
+                    
+                    var w_2 = 8;
+                    var line_x_2 = 250;
+                    var line_y_2 = 0;
+                    var step_2 = 600;
+                    ctx.fillRect(line_x_2,line_y_2,w_2,step_2);
+                    
+                    var w_3 = 4;
+                    var line_x_3 = 120;
+                    var line_y_3 = 0;
+                    var step_3 = 600;
+                    ctx.fillRect(line_x_3,line_y_3,w_3,step_3);
+                
+                                                                                            // drawing red and blue car
+                
+                    ctx.drawImage(redcar,moveredcar,480,50,76);
+                    ctx.drawImage(bluecar,movebluecar,480,50,76);
+                
+                
+                ///////////////////////////////////////// PARTICLES FOR RED CAR //////////////////////////////////
+                
+                particlePosX = moveredcar + 5;                           // attatch first red particle's X axis with red car
+                particlePosY += particlevy;                              // increase its Y axis
+                
+                if (particlePosY > 595){                                  // if the particle goes out of the screen 
+                    particlePosY = 555;                                 // reset it
+                }
+                
+                particlesize += 0.25;                                      // increase particle size as well
+                
+                if (particlesize > 15){                                // when the particle size is greater than 15
+                    particlesize = 5;                                   // make it 5 again
+                    if (particleopacity <= 0){                          // if the opacity goes to 0
+                    particleopacity = 1;                                   // reset it
+                }
+                }
+                
+                particleopacity -= 0.025;                                  // decreasing particle opacity
+                
+                ctx.fillStyle = "rgba(255,0,0," + particleopacity + ")";                 // set style of the particle
+                ctx.fillRect(particlePosX,particlePosY,particlesize,particlesize);          // display it 
+                
+                                                                           // All particles are displayed in the same way
+                
+                particlePosX_2 = moveredcar + 25;
+                particlePosY_2 += particlevy_2;
+                
+                if (particlePosY_2 > 595){
+                    particlePosY_2 = 555;
+                }
+                
+                particlesize_2 += 0.25;
+                
+                if (particlesize_2 > 12){
+                    particlesize_2 = 2;
+                    if (particleopacity <= 0){
+                    particleopacity = 1;
+                }
+                }
+                
+                ctx.fillStyle = "rgba(255,0,0," + particleopacity + ")";
+                ctx.fillRect(particlePosX_2,particlePosY_2,particlesize_2,particlesize_2);
+                
+                particlePosX_3 = moveredcar + 18;
+                particlePosY_3 += particlevy_3;
+                
+                if (particlePosY_3 > 595){
+                    particlePosY_3 = 555;
+                }
+                
+                particlesize_3 -= 0.25;
+                
+                if (particlesize_3 < 2){
+                    particlesize_3 = 10;
+                    if (particleopacity <= 0){
+                        particleopacity = 1;
+                    }
+                }
+                
+                ctx.fillStyle = "rgba(255,0,0," + particleopacity + ")";
+                ctx.fillRect(particlePosX_3,particlePosY_3,particlesize_3,particlesize_3);
+                
+                particlePosX_4 = moveredcar + 30;
+                particlePosY_4 += particlevy_4;
+                
+                if (particlePosY_4 > 595){
+                    particlePosY_4 = 555;
+                }
+                
+                particlesize_4 += 0.25;
+                
+                if (particlesize_4 > 12){
+                    particlesize_4 = 2;
+                    if (particleopacity <= 0){
+                        particleopacity = 1;
+                    }
+                }
+                
+                 ctx.fillStyle = "rgba(255,0,0," + particleopacity + ")";
+                ctx.fillRect(particlePosX_4,particlePosY_4,particlesize_4,particlesize_4);
+                
+                
+                /////////////////////////////////////// PARTICLES FOR BLUE CAR //////////////////////////////
+                
+                
+                blueparticlePosX = movebluecar + 5;
+                blueparticlePosY += blueparticlevy;
+                
+                if (blueparticlePosY > 595){
+                    blueparticlePosY = 555;
+                }
+                
+                blueparticlesize += 0.25;
+                
+                if (blueparticlesize > 15){
+                    blueparticlesize = 5;
+                    if (blueparticleopacity <= 0){
+                        blueparticleopacity = 1;
+                    }
+                }
+                
+                blueparticleopacity -= 0.025;
+                
+                ctx.fillStyle = "rgba(0,153,153," + blueparticleopacity + ")";
+                ctx.fillRect(blueparticlePosX,blueparticlePosY,blueparticlesize,blueparticlesize);
+                
+                blueparticlePosX_2 = movebluecar + 20;
+                blueparticlePosY_2 += blueparticlevy_2;
+                
+                if (blueparticlePosY_2 > 595){
+                    blueparticlePosY_2 = 555;
+                }
+                
+                blueparticlesize_2 += 0.25;
+                
+                if (blueparticlesize_2 > 12){
+                    blueparticlesize_2 = 2;
+                    if (blueparticleopacity <= 0){
+                        blueparticleopacity = 1;
+                    }
+                }
+                
+                ctx.fillStyle = "rgba(0,153,153," + blueparticleopacity + ")";
+                ctx.fillRect(blueparticlePosX_2,blueparticlePosY_2,blueparticlesize_2,blueparticlesize_2);
+                
+                blueparticlePosX_3 = movebluecar + 25;
+                blueparticlePosY_3 += particlevy_3;
+                
+                if (blueparticlePosY_3 > 595){
+                    blueparticlePosY_3 = 555;
+                }
+                
+                blueparticlesize_3 -= 0.25;
+                
+                if (blueparticlesize_3 < 2){
+                    blueparticlesize_3 = 10;
+                        if (blueparticleopacity <= 0){
+                            blueparticleopacity = 1;
+                        }
+                }
+                
+                ctx.fillStyle = "rgba(0,153,153," + blueparticleopacity + ")";
+                ctx.fillRect(blueparticlePosX_3,blueparticlePosY_3,blueparticlesize_3,blueparticlesize_3);
+                
+                blueparticlePosX_4 = movebluecar + 40;
+                blueparticlePosY_4 += blueparticlevy_4;
+                
+                if (blueparticlePosY_4 > 595){
+                    blueparticlePosY_4 = 555;
+                }
+                
+                blueparticlesize_4 += 0.25;
+                
+                if (blueparticlesize_4 > 12){
+                    blueparticlesize_4 = 2;
+                        if (blueparticleopacity <= 0){
+                            blueparticleopacity = 1;
+                        }
+                }
+                
+                ctx.fillStyle = "rgba(0,153,153," + blueparticleopacity + ")";
+                ctx.fillRect(blueparticlePosX_4,blueparticlePosY_4,blueparticlesize_4,blueparticlesize_4);
+                
+                
+                // state of the games
+                
+                if (gameover == true){                                // if it is the game over state
+                    gameoveropacity += 0.02;                          // start displaying game over font
+                    ctx.fillStyle = "rgba(0,0,0,0.85)";               // display a black screen
+                    ctx.fillRect(0,0,500,600);                        // place it on the canvas
+                    ctx.font = "50px Righteous";
+                    ctx.fillStyle = "rgba(255,255,255," + gameoveropacity +")";
+                    ctx.fillText("GAME OVER",100,300);                // display the game over font
+                }
+                
+                 if (startgame == false){                             // if it is the start game state
+                    ctx.fillStyle = "rgba(0,0,0,0.85)";               // display a black screen
+                    ctx.fillRect(0,0,500,600);                        // place it on the canvas
+                    ctx.font = "90px Righteous";
+                    ctx.fillStyle = "rgba(255,255,255,1)";
+                    ctx.fillText("2 CARS",100,200);                   // display the TITLE font
+                    ctx.drawImage(playbutton,180,250,150,150);        // draw play button
+                }
+                
+                //                   KEY STATES FOR RED CAR
+                
+                if (keystate[redcarmoveleft]){                  // if keystate is to move red car left
+                        if (moveredcar >= 50){
+                            moveredcar -= 5;                         // decrease its X axis
+                        }
+                    }
+                    
+                    else if (keystate[redcarmoveright]){             // if keystate is to move red car right
+                        if (moveredcar <= 150){
+                            moveredcar += 5;                         // increase ot X axis
+                        }
+                    }
+                
+                
+                //                   KEY STATES FOR BLUE CAR
+                
+                    if (keystate[bluecarmoveleft]){             // if keystate is to move blue car left
+                        if (movebluecar >= 300){
+                            movebluecar -= 5;                   // decrease its X axis
+                        }
+                    }
+                
+                    else if (keystate[bluecarmoveright]){           // if keystate is to move red blue car left
+                        if (movebluecar <= 420){
+                            movebluecar += 5;                   // increase its X axis
+                        }
+                    }
+                
+                ctx.restore();                                       // restore the canvas state stored in RAM
+            }
+            
+            var animateInterval = setInterval(animate,30);        // calling setInterval function to execute animate function
+                                                                  // with the given delay
+             keystate = {};
+                document.addEventListener("keydown",function(evt){               // event listener if the key is pressed
+                keystate[evt.keyCode] = true;
+        
+            });
+                document.addEventListener("keyup",function(evt){                  // event listener if the key is released
+                delete keystate[evt.keyCode];
+            });
+        }
+        
+        window.addEventListener('load',function(event){                    // event listener to load main function
+            initCanvas();
+        });
+    
+    </script>
+</head>
+    <body>
+        <div id = "score_div">
+            <h4>CAN YOU CONTROL 2 CARS AT THE SAME TIME ?</h4>
+        <span>The game was made by Adil Rabbani.<br>This game is the exact replica of the <br> famous android game 2CARS. <br>
+        Use <b style = "margin-left:5px;margin-right:5px;">A</b> and <b style = "margin-left:5px;margin-right:5px;">D</b> to move red car. <br>
+        Use <b style = "margin-left:5px;margin-right:5px;">&#10094</b> and <b style = "margin-left:5px;margin-right:5px;">&#10095</b> to move blue car. <br>
+        Collect <img src = "bluecircle.png" width="20" height="20"> <img src = "redcircle.png" width="20" height="20"> for points. <br>
+        Beware of the obstacles <img src = "obstaclered.png" width="20" height="20"> <img src = "obstacleblue.png" width="20" height="20">.
+        </span>
+        <p style = "font-size:70px;margin-top:50px;">SCORE</p>
+        <p style = "font-size:70px;margin-top:-50px;" id = "score_p"></p>
+        </div>
+        <center><canvas id = "my_canvas" width = "500" height = "600" style = "margin-right:160px;"></canvas></center>        
+        <br>
+        <div id = "about">
+            <br>
+            <center><a href = "AboutDeveloper.html"><h1>ABOUT THE DEVELOPER</h1></a>
+                <div id = "gamepad" style = "margin-top:-50px;">
+                <img src = "icongame.svg" width = "100" height="100">
+                </div>
+            </center>
+        </div>
+    </body>
+</html>
